@@ -5,3 +5,4 @@
 *.log
 .DS_Store
 out/
+id_ed25519*
