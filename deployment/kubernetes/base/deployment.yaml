@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legit-assistant
+  namespace: legit-assistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: legit-assistant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: legit-assistant
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: legit-assistant
+          image: legit-assistant:0.1.0-dev.19
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: legit-assistant-config
+            # Optional G1.2 runtime activation. Absent secret keeps the runtime fail-closed.
+            - secretRef:
+                name: legit-assistant-g12-runtime
+                optional: true
+          env:
+            - name: LEGIT_ASSISTANT_PANEL_SERVICE_HMAC_KEY_B64
+              valueFrom:
+                secretKeyRef:
+                  name: legit-assistant-runtime-secrets
+                  key: panel-service-hmac-key-b64
+            - name: LEGIT_ASSISTANT_PANEL_CONTEXT_HMAC_KEY_B64
+              valueFrom:
+                secretKeyRef:
+                  name: legit-assistant-runtime-secrets
+                  key: panel-context-hmac-key-b64
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi

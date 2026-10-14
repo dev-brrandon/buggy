@@ -1,0 +1,165 @@
+description = 'Framework-free Buggy product domain built strictly on the frozen Assistant Foundation contracts.'
+
+dependencies {
+    api project(':assistant-core')
+    api project(':assistant-knowledge')
+    api project(':assistant-runtime')
+    api project(':assistant-security')
+    api project(':assistant-requests')
+    api project(':assistant-pipeline')
+    api project(':assistant-supervisor')
+    api project(':assistant-observability')
+    api project(':assistant-integration-contracts')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-core').sourceSets.main.output + project(':assistant-knowledge').sourceSets.main.output + project(':assistant-runtime').sourceSets.main.output + project(':assistant-security').sourceSets.main.output + project(':assistant-requests').sourceSets.main.output + project(':assistant-pipeline').sourceSets.main.output + project(':assistant-conversations').sourceSets.main.output + project(':assistant-supervisor').sourceSets.main.output + project(':assistant-observability').sourceSets.main.output + project(':assistant-integration-contracts').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B1 Buggy identity/runtime separation and protected identity-core verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B1BuggyIdentityRuntimeSelfTest'
+}
+
+tasks.register('personalitySelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B2 Buggy Personality seed, evolution, learning-boundary, history and rollback verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B2BuggyPersonalityEvolutionSelfTest'
+}
+
+
+tasks.register('knowledgeSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B4 Buggy Knowledge, Owner Knowledge, Decision Memory, conflict, stale and secret-boundary verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B4BuggyKnowledgeDecisionMemorySelfTest'
+}
+
+
+
+tasks.register('toolCatalogSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B5 Buggy typed tool catalog, resource-scope, request-only and no-shell verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B5BuggyTypedToolCatalogSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.register('automationSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B6 durable Tasks, Activity, proactive automation, risk-composition and Foundation budget/rate-limit verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B6BuggyTasksActivityAutomationSelfTest'
+}
+
+
+tasks.register('selfDevelopmentSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B7 Self-Development lifecycle, source freshness, evidence, risk and approval boundary verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B7BuggySelfDevelopmentLaboratorySelfTest'
+}
+
+
+tasks.register('controlCenterSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B8 Buggy Control Center projection, bounded read-model and no-authority verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B8BuggyControlCenterBackendSelfTest'
+}
+
+
+tasks.register('exclusiveFeaturesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B10 Buggy-exclusive priority, context, correlation, briefing, architecture, incident, history, challenge, investigation and journal verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B10BuggyExclusiveFeaturesSelfTest'
+}
+
+
+tasks.register('supervisorReadinessSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B11 future-assistant Supervisor contract, independence, delegation and no-BYTE/KAESE-implementation verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B11BuggyFutureAssistantSupervisorReadinessSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+
+tasks.register('acceptanceHardeningSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B12 final Buggy V1 acceptance, fail-closed security, concurrency/load and regression verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.B12BuggyAcceptanceHardeningSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+
+
+tasks.register('g10ChannelIngressSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.0 shared Web/Minecraft/Discord Buggy ingress contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.G10BuggyChannelIngressSelfTest'
+}
+
+
+tasks.register('g12RuntimeCompletionSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.2 Buggy read-only natural-language runtime completion verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.G12BuggyRuntimeCompletionSelfTest'
+}
+
+
+
+tasks.register('g14NativeCoreFoundationSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.4 Native Core identity, birth, protocol, personality, maturity and self-model verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.G14BuggyNativeCoreFoundationSelfTest'
+}
+
+
+
+tasks.register('g15MemoryDevelopmentSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.5 Native Memory, Owner isolation, Reflection, Learning Candidate and Development Journal verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.G15BuggyMemoryDevelopmentSelfTest'
+}
+
+
+tasks.register('g16NaturalConversationSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.6 native Conversation Context, Intent, Entity Resolver, Response Planner and model-free voice verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.buggy.G16BuggyNaturalConversationSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+tasks.named('check') {
+    dependsOn tasks.named('selfTest'), tasks.named('g14NativeCoreFoundationSelfTest'), tasks.named('g15MemoryDevelopmentSelfTest'), tasks.named('g16NaturalConversationSelfTest'), tasks.named('g10ChannelIngressSelfTest'), tasks.named('g12RuntimeCompletionSelfTest'), tasks.named('personalitySelfTest'), tasks.named('knowledgeSelfTest'), tasks.named('toolCatalogSelfTest'), tasks.named('automationSelfTest'), tasks.named('selfDevelopmentSelfTest'), tasks.named('controlCenterSelfTest'), tasks.named('exclusiveFeaturesSelfTest'), tasks.named('supervisorReadinessSelfTest'), tasks.named('acceptanceHardeningSelfTest')
+}
+

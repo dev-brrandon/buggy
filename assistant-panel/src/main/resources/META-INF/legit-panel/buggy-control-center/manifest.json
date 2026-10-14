@@ -1,0 +1,17 @@
+{
+  "id": "buggy-control-center-v1",
+  "assistantId": "buggy",
+  "entrypoint": "index.html",
+  "transport": "PANEL_BACKEND_BRIDGE_ONLY",
+  "directAssistantApi": false,
+  "planes": {
+    "COMMAND": ["overview", "chat", "tasks", "approvals", "bugs"],
+    "OBSERVABILITY": ["activity", "incidents", "infrastructure", "deployments", "security", "audit"],
+    "EVOLUTION": ["knowledge", "self-development", "automations", "tools", "assistants", "personality", "settings"]
+  },
+  "readSurfaces": ["overview", "identity", "personality", "tasks", "activity", "approvals", "incidents", "knowledge", "self-development", "automations", "tools", "security", "audit"],
+  "emergencyControls": ["buggy.emergency.pause", "buggy.emergency.read-only", "buggy.emergency.disable-automations", "buggy.emergency.disable-self-healing", "buggy.emergency.disable-tools", "buggy.emergency.maintenance"],
+  "authority": "FOUNDATION_OWNED",
+  "auditMutable": false,
+  "identityCoreMutable": false
+}

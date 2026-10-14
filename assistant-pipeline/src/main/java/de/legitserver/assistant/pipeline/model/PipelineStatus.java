@@ -1,0 +1,22 @@
+package de.legitserver.assistant.pipeline.model;
+
+/** Safe bounded terminal result taxonomy for the request pipeline. */
+public enum PipelineStatus {
+    SUCCESS,
+    AUTHENTICATION_FAILED,
+    ACTOR_RESOLUTION_FAILED,
+    AUTHORIZATION_DENIED,
+    CONVERSATION_UNAVAILABLE,
+    CAPABILITY_UNAVAILABLE,
+    ROUTE_UNAVAILABLE,
+    DEPENDENCY_DEGRADED,
+    POLICY_DENIED,
+    RATE_LIMITED,
+    BACKPRESSURE,
+    IDEMPOTENCY_CONFLICT,
+    CANCELLED,
+    TIMEOUT,
+    EXECUTION_FAILED,
+    RESPONSE_REJECTED,
+    AUDIT_UNAVAILABLE
+}

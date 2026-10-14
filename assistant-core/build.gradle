@@ -1,0 +1,21 @@
+description = 'Framework-free shared assistant domain primitives.'
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-2 framework-free core-domain invariant tests.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.core.Phase2CoreSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

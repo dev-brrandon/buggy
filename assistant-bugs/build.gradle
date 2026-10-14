@@ -1,0 +1,22 @@
+description = 'Framework-free central Bug domain, immutable original reports, append-only history, relations, and mapping contracts.'
+dependencies { api project(':assistant-core') }
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-core').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-8 framework-free Bug Foundation verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.bugs.Phase8BugSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

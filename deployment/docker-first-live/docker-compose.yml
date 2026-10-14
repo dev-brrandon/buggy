@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: legit-assistant-postgres-first-live
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${LEGIT_ASSISTANT_DB_NAME:-legit_assistant}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${LEGIT_ASSISTANT_DB_ADMIN_PASSWORD:?set LEGIT_ASSISTANT_DB_ADMIN_PASSWORD}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=trust
+      LEGIT_ASSISTANT_POSTGRES_PASSWORD: ${LEGIT_ASSISTANT_POSTGRES_PASSWORD:?set LEGIT_ASSISTANT_POSTGRES_PASSWORD}
+      LEGIT_ASSISTANT_MIGRATOR_PASSWORD: ${LEGIT_ASSISTANT_MIGRATOR_PASSWORD:?set LEGIT_ASSISTANT_MIGRATOR_PASSWORD}
+    volumes:
+      - legit_assistant_postgres_data:/var/lib/postgresql
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/00-assistant-init.sh:ro
+      - ../../assistant-persistence/src/main/resources/db:/opt/legit/assistant-db:ro
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d $${POSTGRES_DB} -q"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  assistant:
+    image: legit-assistant:0.1.0-dev.19-first-live
+    container_name: legit-assistant-first-live
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      LEGIT_ASSISTANT_POSTGRES_URL: jdbc:postgresql://postgres:5432/${LEGIT_ASSISTANT_DB_NAME:-legit_assistant}
+      LEGIT_ASSISTANT_POSTGRES_USER: legit_assistant_app
+      LEGIT_ASSISTANT_POSTGRES_PASSWORD: ${LEGIT_ASSISTANT_POSTGRES_PASSWORD:?set LEGIT_ASSISTANT_POSTGRES_PASSWORD}
+      LEGIT_ASSISTANT_BUGGY_PRIMARY_OWNER_ACTOR_ID: ${LEGIT_ASSISTANT_BUGGY_PRIMARY_OWNER_ACTOR_ID:?set LEGIT_ASSISTANT_BUGGY_PRIMARY_OWNER_ACTOR_ID}
+
+      LEGIT_ASSISTANT_PANEL_SERVICE_HMAC_KEY_B64: ${LEGIT_ASSISTANT_PANEL_SERVICE_HMAC_KEY_B64:-}
+      LEGIT_ASSISTANT_PANEL_CONTEXT_HMAC_KEY_B64: ${LEGIT_ASSISTANT_PANEL_CONTEXT_HMAC_KEY_B64:-}
+      LEGIT_ASSISTANT_NETWORKCORE_HMAC_KEY_B64: ${LEGIT_ASSISTANT_NETWORKCORE_HMAC_KEY_B64:-}
+
+      LEGIT_NETWORKCORE_ASSISTANT_AUTHORITY_URL: ${LEGIT_NETWORKCORE_ASSISTANT_AUTHORITY_URL:-}
+      LEGIT_ASSISTANT_NETWORKCORE_AUTHORITY_HMAC_KEY_B64: ${LEGIT_ASSISTANT_NETWORKCORE_AUTHORITY_HMAC_KEY_B64:-}
+
+      LEGIT_ASSISTANT_INFERENCE_URL: ${LEGIT_ASSISTANT_INFERENCE_URL:-}
+      LEGIT_ASSISTANT_INFERENCE_MODEL: ${LEGIT_ASSISTANT_INFERENCE_MODEL:-}
+      LEGIT_ASSISTANT_INFERENCE_API_KEY: ${LEGIT_ASSISTANT_INFERENCE_API_KEY:-}
+      LEGIT_ASSISTANT_INFERENCE_ALLOW_EXTERNAL: ${LEGIT_ASSISTANT_INFERENCE_ALLOW_EXTERNAL:-false}
+
+      LEGIT_ASSISTANT_MANAGEMENT_ADDRESS: 127.0.0.1
+      LEGIT_ASSISTANT_MANAGEMENT_PORT: 9091
+    ports:
+      - "127.0.0.1:${LEGIT_ASSISTANT_HTTP_PORT:-18080}:8080"
+    networks:
+      - database
+      - edge
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+
+networks:
+  database:
+    internal: true
+  edge:
+    driver: bridge
+
+volumes:
+  legit_assistant_postgres_data:

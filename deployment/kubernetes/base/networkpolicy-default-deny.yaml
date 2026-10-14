@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legit-assistant-default-deny
+  namespace: legit-assistant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legit-assistant
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []

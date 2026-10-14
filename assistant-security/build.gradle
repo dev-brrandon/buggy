@@ -1,0 +1,30 @@
+description = 'Assistant security policies and authorization ports.'
+dependencies { api project(':assistant-core') }
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-core').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-3 framework-free security foundation verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.security.Phase3SecuritySelfTest'
+}
+
+tasks.register('buggyAuthoritySelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B3 Buggy authority/capability profile and NetworkCore binding verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.security.buggy.B3BuggyAuthorityCapabilitySelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest'), tasks.named('buggyAuthoritySelfTest')
+}

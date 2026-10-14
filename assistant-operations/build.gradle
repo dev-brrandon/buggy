@@ -1,0 +1,22 @@
+description = 'Phase-17 deployment and operations verification contracts.'
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-17 deployment, container, network, backup and recovery contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.operations.Phase17DeploymentOperationsSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

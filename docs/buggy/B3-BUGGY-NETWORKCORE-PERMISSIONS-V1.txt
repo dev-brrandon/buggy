@@ -1,0 +1,44 @@
+# Buggy B3 — Required NetworkCore permissions (generated from BuggySecurityCatalog)
+# Profile: buggy-capabilities-v1
+# Date: 2026-10-04
+
+networkcore.assistant.buggy.bugs.mutate
+networkcore.assistant.buggy.bugs.read
+networkcore.assistant.buggy.build.execute
+networkcore.assistant.buggy.database.read
+networkcore.assistant.buggy.database.write.request
+networkcore.assistant.buggy.deployment.nonprod.execute
+networkcore.assistant.buggy.deployment.production.request
+networkcore.assistant.buggy.deployment.read
+networkcore.assistant.buggy.diagnostics.execute
+networkcore.assistant.buggy.diagnostics.read
+networkcore.assistant.buggy.discord.execute.low
+networkcore.assistant.buggy.discord.read
+networkcore.assistant.buggy.infrastructure.read
+networkcore.assistant.buggy.infrastructure.recovery.low
+networkcore.assistant.buggy.infrastructure.request
+networkcore.assistant.buggy.knowledge.draft.mutate
+networkcore.assistant.buggy.knowledge.read
+networkcore.assistant.buggy.mail.read
+networkcore.assistant.buggy.mail.send.request
+networkcore.assistant.buggy.minecraft.execute.low
+networkcore.assistant.buggy.minecraft.read
+networkcore.assistant.buggy.network.mutate.request
+networkcore.assistant.buggy.network.read
+networkcore.assistant.buggy.operations.execute.low
+networkcore.assistant.buggy.operations.mutate.low
+networkcore.assistant.buggy.panel.execute
+networkcore.assistant.buggy.panel.read
+networkcore.assistant.buggy.requests.create
+networkcore.assistant.buggy.requests.read
+networkcore.assistant.buggy.security.read
+networkcore.assistant.buggy.security.request
+networkcore.assistant.buggy.selfdevelopment.execute
+networkcore.assistant.buggy.selfdevelopment.workspace.mutate
+networkcore.assistant.buggy.source.read
+networkcore.assistant.buggy.source.workspace.mutate
+networkcore.assistant.buggy.supervisor.execute
+networkcore.assistant.buggy.supervisor.read
+networkcore.assistant.buggy.web.execute
+networkcore.assistant.buggy.web.read
+networkcore.assistant.use.buggy

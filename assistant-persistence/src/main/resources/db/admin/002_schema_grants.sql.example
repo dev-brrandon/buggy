@@ -1,0 +1,16 @@
+-- Execute after migrations as legit_assistant_owner or an administrator.
+GRANT USAGE ON SCHEMA assistant, bugs, knowledge, requests, audit TO legit_assistant_app;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA assistant, bugs, knowledge, requests TO legit_assistant_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA assistant, bugs, knowledge, requests TO legit_assistant_app;
+
+-- Audit is append-oriented: no UPDATE/DELETE grant.
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA audit TO legit_assistant_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA audit TO legit_assistant_app;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE legit_assistant_owner IN SCHEMA assistant, bugs, knowledge, requests
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO legit_assistant_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE legit_assistant_owner IN SCHEMA audit
+    GRANT SELECT, INSERT ON TABLES TO legit_assistant_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE legit_assistant_owner IN SCHEMA assistant, bugs, knowledge, requests, audit
+    GRANT USAGE, SELECT ON SEQUENCES TO legit_assistant_app;

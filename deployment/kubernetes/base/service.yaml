@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: legit-assistant
+  namespace: legit-assistant
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: legit-assistant
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

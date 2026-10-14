@@ -1,0 +1,5 @@
+-- Run as a PostgreSQL administrative role. No passwords belong in source control.
+CREATE ROLE legit_assistant_owner NOLOGIN;
+CREATE ROLE legit_assistant_migrator LOGIN NOINHERIT;
+CREATE ROLE legit_assistant_app LOGIN NOINHERIT;
+GRANT legit_assistant_owner TO legit_assistant_migrator;

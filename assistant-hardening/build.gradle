@@ -1,0 +1,50 @@
+description = 'Phase-16 security hardening, load, soak, and performance verification.'
+
+dependencies {
+    implementation project(':assistant-core')
+    implementation project(':assistant-security')
+    implementation project(':assistant-observability')
+    implementation project(':assistant-conversations')
+    implementation project(':assistant-knowledge')
+    implementation project(':assistant-bugs')
+    implementation project(':assistant-requests')
+    implementation project(':assistant-runtime')
+    implementation project(':assistant-supervisor')
+    implementation project(':assistant-integration-contracts')
+    implementation project(':assistant-pipeline')
+    implementation project(':assistant-panel')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += project(':assistant-core').sourceSets.main.output
+        compileClasspath += project(':assistant-security').sourceSets.main.output
+        compileClasspath += project(':assistant-observability').sourceSets.main.output
+        compileClasspath += project(':assistant-conversations').sourceSets.main.output
+        compileClasspath += project(':assistant-knowledge').sourceSets.main.output
+        compileClasspath += project(':assistant-bugs').sourceSets.main.output
+        compileClasspath += project(':assistant-requests').sourceSets.main.output
+        compileClasspath += project(':assistant-runtime').sourceSets.main.output
+        compileClasspath += project(':assistant-supervisor').sourceSets.main.output
+        compileClasspath += project(':assistant-integration-contracts').sourceSets.main.output
+        compileClasspath += project(':assistant-pipeline').sourceSets.main.output
+        compileClasspath += project(':assistant-panel').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-16 security, load, soak, N+1, queue-bound and latency-budget verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.hardening.Phase16HardeningPerformanceSelfTest'
+    args rootProject.projectDir.absolutePath
+    jvmArgs '-Xms128m', '-Xmx512m'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

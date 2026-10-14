@@ -1,0 +1,32 @@
+description = 'Framework-free controlled Tool Runtime with authorization, approval binding, schema, concurrency, timeout, sanitization, metrics, and audit gates.'
+dependencies {
+    api project(':assistant-core')
+    implementation project(':assistant-security')
+    implementation project(':assistant-observability')
+    implementation project(':assistant-requests')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += project(':assistant-core').sourceSets.main.output
+        compileClasspath += project(':assistant-security').sourceSets.main.output
+        compileClasspath += project(':assistant-observability').sourceSets.main.output
+        compileClasspath += project(':assistant-requests').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-10 framework-free Tool Runtime verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.runtime.Phase10ToolRuntimeSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

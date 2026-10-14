@@ -1,0 +1,84 @@
+description = 'Versioned HTTP transport/API boundary for the Assistant Platform.'
+
+dependencies {
+    api project(':assistant-core')
+    api project(':assistant-panel')
+    implementation project(':assistant-runtime')
+    implementation project(':assistant-observability')
+    implementation project(':assistant-pipeline')
+    implementation project(':assistant-conversations')
+    implementation project(':assistant-bugs')
+    implementation project(':assistant-knowledge')
+    implementation project(':assistant-requests')
+    implementation project(':assistant-supervisor')
+    implementation project(':assistant-security')
+    implementation project(':assistant-buggy')
+    compileOnly fileTree(dir: rootProject.file('vendor/panel-gateway-libs'), include: ['*.jar'])
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        resources.srcDir 'src/main/resources'
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + compileClasspath + configurations.runtimeClasspath
+    }
+}
+
+configurations {
+    selfTestImplementation.extendsFrom implementation
+    selfTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-14 versioned Assistant API contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.api.v1.Phase14AssistantApiSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}
+
+tasks.register('phase15SelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-15 Panel-to-API-to-Pipeline approval integration verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.api.v1.Phase15PanelPipelineSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('phase15SelfTest')
+}
+
+
+tasks.register('buggyControlCenterSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B8 secured Buggy Control Center API and realtime boundary verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.api.v1.B8BuggyControlCenterApiSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('buggyControlCenterSelfTest')
+}
+
+
+tasks.register('g12NetworkCoreIngressSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.2 private NetworkCore-to-Assistant ingress security verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.api.v1.G12NetworkCoreIngressSecuritySelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('g12NetworkCoreIngressSelfTest')
+}

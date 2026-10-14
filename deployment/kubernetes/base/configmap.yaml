@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: legit-assistant-config
+  namespace: legit-assistant
+data:
+  SERVER_PORT: "8080"
+  LEGIT_ASSISTANT_MANAGEMENT_ADDRESS: "127.0.0.1"
+  LEGIT_ASSISTANT_MANAGEMENT_PORT: "9091"

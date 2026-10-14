@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: legit-assistant
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+server:
+  shutdown: graceful
+management:
+  server:
+    address: ${LEGIT_ASSISTANT_MANAGEMENT_ADDRESS:127.0.0.1}
+    port: ${LEGIT_ASSISTANT_MANAGEMENT_PORT:9091}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      show-components: always
+      group:
+        readiness:
+          include: readinessState,phase6Dependencies
+        liveness:
+          include: livenessState
+  info:
+    env:
+      enabled: true
+info:
+  app:
+    name: Legit Assistant Platform
+    phase: 18
+    foundation-status: foundation-final-verification

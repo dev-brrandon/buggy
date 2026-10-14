@@ -1,0 +1,25 @@
+description = 'Framework-free Request / Approval domain with payload-hash binding, expiry, multi-approval, concurrency, and audit gates.'
+dependencies {
+    api project(':assistant-core')
+    implementation project(':assistant-observability')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-core').sourceSets.main.output + project(':assistant-observability').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-9 framework-free Request / Approval Foundation verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.requests.Phase9RequestApprovalSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

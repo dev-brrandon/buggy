@@ -1,0 +1,18 @@
+package de.legitserver.assistant.security.authorization.buggy;
+
+/** Explicit V1 hard boundary. These operations can be prepared/requested by Buggy but never self-authorized. */
+public enum BuggyOwnerOnlyAction {
+    ALTER_SECURITY_AUTHORITY,
+    CHANGE_BUGGY_AUTHORITY,
+    CHANGE_ROLES_OR_PERMISSIONS,
+    CHANGE_NETWORKCORE_SECURITY_RULES,
+    WEAKEN_APPROVAL_POLICY,
+    ROTATE_CRITICAL_PRODUCTION_CREDENTIAL,
+    IRREVERSIBLE_PRODUCTION_DATA_DELETE,
+    DESTROY_BACKUP,
+    ALTER_AUDIT_INTEGRITY,
+    DISABLE_GLOBAL_KILL_SWITCH,
+    CRITICAL_FIREWALL_OR_ROUTING_CHANGE,
+    PERMANENTLY_DELETE_ASSISTANT,
+    BYPASS_CLASSIFICATION_OR_SECURITY_CONTROL
+}

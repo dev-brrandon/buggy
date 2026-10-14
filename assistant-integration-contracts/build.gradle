@@ -1,0 +1,29 @@
+description = 'Framework-free future integration contracts and safe no-op adapters.'
+
+dependencies {
+    api project(':assistant-core')
+    api project(':assistant-requests')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += project(':assistant-core').sourceSets.main.output
+        compileClasspath += project(':assistant-requests').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-12 framework-free integration contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.contracts.Phase12IntegrationContractsSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

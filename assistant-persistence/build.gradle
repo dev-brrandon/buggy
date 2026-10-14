@@ -1,0 +1,50 @@
+description = 'PostgreSQL-first persistence infrastructure and repository transaction foundation.'
+
+def postgresqlDriver = files(rootProject.file('vendor/postgresql/postgresql-42.7.13.jar'))
+
+dependencies {
+    runtimeOnly postgresqlDriver
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + files(rootProject.file('vendor/test-db/hsqldb1.8.0-1.8.0.10+dfsg.jar'))
+        runtimeClasspath += output + compileClasspath + files(rootProject.file('vendor/test-db/hsqldb1.8.0-1.8.0.10+dfsg.jar'))
+    }
+    postgresTest {
+        java.srcDir 'src/postgresTest/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath + postgresqlDriver
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-4 persistence foundation verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.persistence.Phase4PersistenceSelfTest'
+    args projectDir.absolutePath
+}
+
+tasks.register('postgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs the Phase-4 live PostgreSQL JDBC transaction and optimistic-locking verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.persistence.Phase4PostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

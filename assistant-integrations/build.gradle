@@ -1,0 +1,335 @@
+description = 'Infrastructure adapters and external integration boundaries.'
+
+def postgresqlDriver = files(rootProject.file('vendor/postgresql/postgresql-42.7.13.jar'))
+
+dependencies {
+    api project(':assistant-core')
+    implementation project(':assistant-integration-contracts')
+    implementation project(':assistant-security')
+    implementation project(':assistant-buggy')
+    implementation project(':assistant-conversations')
+    implementation project(':assistant-knowledge')
+    implementation project(':assistant-bugs')
+    implementation project(':assistant-requests')
+    implementation project(':assistant-persistence')
+    implementation project(':assistant-observability')
+    compileOnly files(rootProject.file('vendor/foundation/LegitPlatform-API-0.1.2-dev.6.jar'))
+    runtimeOnly postgresqlDriver
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-security').sourceSets.main.output + project(':assistant-core').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath + files(rootProject.file('vendor/foundation/LegitPlatform-API-0.1.2-dev.6.jar'))
+    }
+    postgresTest {
+        java.srcDir 'src/postgresTest/java'
+        compileClasspath += sourceSets.main.output + project(':assistant-buggy').sourceSets.main.output + project(':assistant-conversations').sourceSets.main.output + project(':assistant-knowledge').sourceSets.main.output + project(':assistant-bugs').sourceSets.main.output + project(':assistant-requests').sourceSets.main.output + project(':assistant-persistence').sourceSets.main.output + project(':assistant-core').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath + postgresqlDriver
+    }
+}
+
+configurations {
+    selfTestImplementation.extendsFrom implementation
+    postgresTestImplementation.extendsFrom implementation
+}
+
+dependencies {
+    selfTestImplementation files(rootProject.file('vendor/foundation/LegitPlatform-API-0.1.2-dev.6.jar'))
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-3 NetworkCore/LegitPlatform adapter compatibility tests.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.networkcore.Phase3NetworkCoreAdapterSelfTest'
+}
+
+tasks.register('phase6PostgresObservabilitySelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-6 live PostgreSQL latency instrumentation verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.persistence.Phase6PostgresObservabilitySelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+tasks.register('conversationPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-5 live PostgreSQL conversation repository verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.conversations.Phase5PostgresConversationSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('knowledgePostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-7 live PostgreSQL Knowledge Catalog, ACL, immutability, and search verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.knowledge.Phase7PostgresKnowledgeSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('bugPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-8 live PostgreSQL Bug Foundation, history, relations, mapping, and concurrency verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.bugs.Phase8PostgresBugSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('requestPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-9 live PostgreSQL Request / Approval payload-binding, expiry, audit, and concurrency verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.requests.Phase9PostgresRequestApprovalSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+tasks.register('buggyIdentityPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B1 live PostgreSQL Buggy identity/runtime persistence and immutability verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B1BuggyIdentityPostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('buggyAuthorityBindingSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B3 cross-module Buggy manifest-to-Foundation Security profile binding verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B3BuggyCapabilityBindingSelfTest'
+}
+
+tasks.register('buggyPersonalitySecretGuardSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B2 Personality persistence boundary verification against the Foundation SecretGuard.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B2PersonalitySecretGuardSelfTest'
+}
+
+tasks.register('buggyPersonalityPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B2 live PostgreSQL Personality seed, evolution, history, rollback, immutability and secret-boundary verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B2BuggyPersonalityPostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('buggyKnowledgeSecretGuardSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B4 Knowledge secret-exclusion verification against the Foundation SecretGuard.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B4KnowledgeSecretGuardSelfTest'
+}
+
+tasks.register('buggyKnowledgePostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B4 live PostgreSQL Knowledge binding, Owner Decision Memory and annotation immutability verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B4BuggyKnowledgePostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+tasks.register('phase6AuditSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-6 Foundation audit adapter verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.audit.Phase6FoundationAuditAdapterSelfTest'
+}
+
+
+tasks.register('buggyAutomationActivationGuardSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B6 privileged automation activation binding verification against Foundation Requests/Approvals.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B6AutomationActivationGuardSelfTest'
+}
+
+
+
+tasks.register('buggySelfDevelopmentFoundationBindingSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B7 Self-Development bindings against Foundation Requests/Approvals and SecretGuard.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B7SelfDevelopmentFoundationBindingSelfTest'
+}
+tasks.register('buggyTasksAutomationPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B6 live PostgreSQL durable Tasks, Activity and Automation append-only verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B6BuggyTasksAutomationPostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+
+tasks.register('buggySelfDevelopmentPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B7 live PostgreSQL Self-Development revision/evidence append-only verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.B7BuggySelfDevelopmentPostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+tasks.register('g12NetworkCoreAuthorityClientSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.2 request-bound Assistant -> NetworkCore read-only authority HTTP contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.networkcore.G12NetworkCoreAuthorityClientSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest'), tasks.named('g12NetworkCoreAuthorityClientSelfTest'), tasks.named('phase6AuditSelfTest'), tasks.named('buggyPersonalitySecretGuardSelfTest'), tasks.named('buggyAuthorityBindingSelfTest'), tasks.named('buggyKnowledgeSecretGuardSelfTest'), tasks.named('buggyAutomationActivationGuardSelfTest'), tasks.named('buggySelfDevelopmentFoundationBindingSelfTest')
+}
+
+
+tasks.register('g12InferenceAdapterSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.2 bounded OpenAI-compatible inference adapter verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.inference.G12InferenceAdapterSelfTest'
+}
+
+
+tasks.named('check') { dependsOn tasks.named('g12InferenceAdapterSelfTest') }
+
+
+tasks.register('g15MemoryDevelopmentPostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.5 live PostgreSQL Native Memory/Development append-only and isolation verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.G15BuggyMemoryDevelopmentPostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}
+
+
+tasks.register('g14NativeCorePostgresSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs G1.4 live PostgreSQL immutable Native-Core birth/baseline verification.'
+    dependsOn tasks.named('postgresTestClasses')
+    classpath = sourceSets.postgresTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.integrations.buggy.G14BuggyNativeCorePostgresSelfTest'
+    doFirst {
+        def jdbcUrl = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_URL')
+        def user = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_USER')
+        def password = System.getenv('LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD') ?: ''
+        if (jdbcUrl == null || jdbcUrl.isBlank() || user == null || user.isBlank()) {
+            throw new GradleException('LEGIT_ASSISTANT_POSTGRES_TEST_URL and LEGIT_ASSISTANT_POSTGRES_TEST_USER are required')
+        }
+        args jdbcUrl, user, password
+    }
+}

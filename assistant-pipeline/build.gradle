@@ -1,0 +1,36 @@
+description = 'Framework-free Phase-13 end-to-end Assistant request runtime pipeline.'
+
+dependencies {
+    api project(':assistant-core')
+    implementation project(':assistant-security')
+    implementation project(':assistant-observability')
+    api project(':assistant-conversations')
+    implementation project(':assistant-requests')
+    implementation project(':assistant-runtime')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += project(':assistant-core').sourceSets.main.output
+        compileClasspath += project(':assistant-security').sourceSets.main.output
+        compileClasspath += project(':assistant-observability').sourceSets.main.output
+        compileClasspath += project(':assistant-conversations').sourceSets.main.output
+        compileClasspath += project(':assistant-requests').sourceSets.main.output
+        compileClasspath += project(':assistant-runtime').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-13 framework-free Runtime Pipeline verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.pipeline.Phase13RuntimePipelineSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

@@ -1,0 +1,22 @@
+package de.legitserver.assistant.security.authorization;
+
+/** Stable internal authorization denial taxonomy. */
+public enum AuthorizationDenialReason {
+    NONE,
+    SERVICE_UNAUTHENTICATED,
+    SERVICE_SCOPE_MISSING,
+    ACTOR_NOT_FOUND,
+    AUTHORITY_UNAVAILABLE,
+    ACTOR_BINDING_MISMATCH,
+    ASSISTANT_DISABLED,
+    ASSISTANT_USE_DENIED,
+    CAPABILITY_UNKNOWN,
+    ASSISTANT_CAPABILITY_DENIED,
+    PERMISSION_DENIED,
+    RESOURCE_DENIED,
+    RESOURCE_AUTHORIZATION_UNAVAILABLE,
+    FEATURE_DISABLED,
+    KILL_SWITCH_ACTIVE,
+    READ_ONLY_MODE,
+    MAINTENANCE_MODE
+}

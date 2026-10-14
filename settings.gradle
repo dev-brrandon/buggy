@@ -1,0 +1,28 @@
+rootProject.name = 'legit-assistant'
+
+include 'assistant-core'
+include 'assistant-buggy'
+include 'assistant-security'
+include 'assistant-observability'
+include 'assistant-conversations'
+include 'assistant-knowledge'
+include 'assistant-bugs'
+include 'assistant-requests'
+include 'assistant-runtime'
+include 'assistant-integrations'
+include 'assistant-api'
+include 'assistant-bootstrap'
+
+include 'assistant-persistence'
+
+include 'assistant-supervisor'
+
+include 'assistant-integration-contracts'
+include 'assistant-pipeline'
+include 'assistant-panel'
+
+include 'assistant-hardening'
+
+include 'assistant-operations'
+
+include 'assistant-foundation-verification'

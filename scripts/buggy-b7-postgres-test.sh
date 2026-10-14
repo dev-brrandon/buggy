@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+: "${LEGIT_ASSISTANT_POSTGRES_TEST_URL:?LEGIT_ASSISTANT_POSTGRES_TEST_URL is required}"
+: "${LEGIT_ASSISTANT_POSTGRES_TEST_USER:?LEGIT_ASSISTANT_POSTGRES_TEST_USER is required}"
+export LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD="${LEGIT_ASSISTANT_POSTGRES_TEST_PASSWORD:-}"
+./gradlew :assistant-integrations:buggySelfDevelopmentPostgresSelfTest

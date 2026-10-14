@@ -1,0 +1,45 @@
+description = 'Phase-18 final Foundation verification and acceptance gates.'
+
+dependencies {
+    implementation project(':assistant-core')
+    implementation project(':assistant-security')
+    implementation project(':assistant-observability')
+    implementation project(':assistant-conversations')
+    implementation project(':assistant-knowledge')
+    implementation project(':assistant-bugs')
+    implementation project(':assistant-requests')
+    implementation project(':assistant-runtime')
+    implementation project(':assistant-integrations')
+    implementation project(':assistant-supervisor')
+    implementation project(':assistant-integration-contracts')
+    implementation project(':assistant-pipeline')
+    implementation project(':assistant-panel')
+    implementation project(':assistant-hardening')
+    implementation project(':assistant-operations')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + configurations.runtimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    selfTestImplementation.extendsFrom implementation
+    selfTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs the Phase-18 cross-foundation final verification and emergency-control gates.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.verification.Phase18FoundationFinalVerificationSelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}

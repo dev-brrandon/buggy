@@ -1,0 +1,42 @@
+description = 'Framework-free Phase-15 Panel gateway security, HTTP client, degraded state and realtime contracts.'
+
+dependencies {
+    api project(':assistant-core')
+    implementation project(':assistant-security')
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += project(':assistant-core').sourceSets.main.output
+        compileClasspath += project(':assistant-security').sourceSets.main.output
+        compileClasspath += project(':assistant-requests').sourceSets.main.output
+        compileClasspath += project(':assistant-observability').sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs Phase-15 framework-free Panel integration contract verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.panel.Phase15PanelIntegrationSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}
+
+tasks.register('buggyControlCenterFrontendSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs B9 Buggy Control Center frontend plane, bridge, emergency-boundary and static-safety verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.panel.B9BuggyControlCenterFrontendSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('buggyControlCenterFrontendSelfTest')
+}

@@ -1,0 +1,113 @@
+plugins {
+    id 'base'
+}
+
+allprojects {
+    group = 'de.legitserver.assistant'
+    version = '0.1.0-dev.21'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+        withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.compilerArgs += ['-Xlint:all,-processing', '-Werror']
+    }
+
+    tasks.withType(Jar).configureEach {
+        reproducibleFileOrder = true
+        preserveFileTimestamps = false
+    }
+}
+
+def textTargets = {
+    fileTree(rootProject.projectDir) {
+        include '**/*.java', '**/*.gradle', '**/*.md', '**/*.yml', '**/*.yaml', '**/*.sh'
+        include '.gitignore', '.gitattributes', 'gradle.properties', 'Dockerfile'
+        exclude '**/build/**', '.gradle/**', 'vendor/**'
+    }
+}
+
+tasks.register('formatCheck') {
+    group = 'verification'
+    description = 'Checks canonical whitespace formatting without external formatter dependencies.'
+    doLast {
+        def violations = []
+        textTargets().each { f ->
+            byte[] bytes = f.bytes
+            String text = new String(bytes, 'UTF-8')
+            if (text.contains('\r')) {
+                violations << "${f}: CRLF/CR line endings are not allowed"
+            }
+            if (!text.isEmpty() && !text.endsWith('\n')) {
+                violations << "${f}: missing final newline"
+            }
+            text.readLines().eachWithIndex { line, index ->
+                if (line ==~ /.*[ \t]+$/) {
+                    violations << "${f}:${index + 1}: trailing whitespace"
+                }
+                if (f.name.endsWith('.java') && line.contains('\t')) {
+                    violations << "${f}:${index + 1}: tab character in Java source"
+                }
+            }
+        }
+        if (!violations.isEmpty()) {
+            throw new GradleException('Formatting violations:\n' + violations.join('\n'))
+        }
+    }
+}
+
+tasks.register('formatSource') {
+    group = 'formatting'
+    description = 'Normalizes line endings, trailing whitespace, and final newlines.'
+    doLast {
+        textTargets().each { f ->
+            String text = f.getText('UTF-8').replace('\r\n', '\n').replace('\r', '\n')
+            text = text.readLines().collect { it.replaceFirst(/[ \t]+$/, '') }.join('\n')
+            if (!text.isEmpty()) {
+                text += '\n'
+            }
+            f.setText(text, 'UTF-8')
+        }
+    }
+}
+
+tasks.register('verifyVendorBaseline') {
+    group = 'verification'
+    description = 'Verifies SHA-256 hashes of every pinned vendored baseline artifact.'
+    doLast {
+        def sumFiles = fileTree('vendor') { include '**/SHA256SUMS' }.files.sort { it.path }
+        if (sumFiles.isEmpty()) throw new GradleException('No vendor SHA256SUMS manifests found')
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        sumFiles.each { sums ->
+            File vendorDir = sums.parentFile
+            sums.eachLine('UTF-8') { line ->
+                def normalized = line.trim()
+                if (normalized.isEmpty()) return
+                def parts = normalized.split(/\s+/, 2)
+                if (parts.length != 2) throw new GradleException("Malformed checksum line in ${sums}: ${line}")
+                File artifact = new File(vendorDir, parts[1])
+                if (!artifact.isFile()) throw new GradleException("Missing vendored artifact: ${artifact}")
+                byte[] actualBytes = digest.digest(artifact.bytes)
+                String actual = actualBytes.collect { String.format('%02x', it & 0xff) }.join()
+                digest.reset()
+                if (actual != parts[0]) throw new GradleException("Checksum mismatch: ${artifact}")
+            }
+        }
+    }
+}
+
+tasks.register('qualityCheck') {
+    group = 'verification'
+    description = 'Runs formatting, vendor integrity, compiler static analysis, and self-tests.'
+    dependsOn 'formatCheck', 'verifyVendorBaseline'
+    dependsOn subprojects.collect { it.tasks.named('check') }
+}

@@ -1,0 +1,70 @@
+plugins {
+    id 'application'
+}
+
+description = 'Executable Spring Boot host for the Assistant Platform.'
+
+dependencies {
+    implementation project(':assistant-conversations')
+    implementation project(':assistant-buggy')
+    implementation project(':assistant-api')
+    implementation project(':assistant-panel')
+    implementation project(':assistant-security')
+    implementation project(':assistant-runtime')
+    implementation project(':assistant-pipeline')
+    implementation project(':assistant-supervisor')
+    implementation project(':assistant-integrations')
+    implementation project(':assistant-integration-contracts')
+    implementation project(':assistant-persistence')
+    implementation project(':assistant-observability')
+    implementation fileTree(dir: rootProject.file('vendor/panel-gateway-libs'), include: ['*.jar'])
+}
+
+application {
+    mainClass = 'de.legitserver.assistant.bootstrap.LegitAssistantApplication'
+    applicationName = 'legit-assistant'
+}
+
+distributions {
+    main {
+        distributionBaseName = 'legit-assistant'
+    }
+}
+
+sourceSets {
+    selfTest {
+        java.srcDir 'src/selfTest/java'
+        compileClasspath += sourceSets.main.output + configurations.runtimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    selfTestImplementation.extendsFrom implementation
+    selfTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+tasks.register('selfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs framework bootstrap and architecture self-tests without external test libraries.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.bootstrap.Phase1SelfTest'
+    args rootProject.projectDir.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('selfTest')
+}
+
+tasks.register('firstLiveRuntimeSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs first-live dependency readiness verification.'
+    dependsOn tasks.named('selfTestClasses')
+    classpath = sourceSets.selfTest.runtimeClasspath
+    mainClass = 'de.legitserver.assistant.bootstrap.FirstLiveRuntimeSelfTest'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('firstLiveRuntimeSelfTest')
+}

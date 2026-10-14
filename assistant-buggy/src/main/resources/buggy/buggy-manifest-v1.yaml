@@ -1,0 +1,33 @@
+bot:
+  schema_version: 1
+  id: buggy
+  assistant_id: BUGGY
+  display_name: Buggy
+  service_identity: assistant:buggy
+  type: OWNER_ASSISTANT
+  scopes:
+    - NETWORK_WIDE
+    - OWNER_DIRECTED
+
+identity:
+  persistent: true
+  identity_core_protected: true
+  primary_role: PERSONAL_OWNER_AND_NETWORK_OPERATIONS_ASSISTANT
+
+profiles:
+  capability: buggy-capabilities-v1
+  policy: buggy-policy-v1
+  knowledge: buggy-knowledge-v1
+  runtime: buggy-runtime-v1
+  personality: null # bootstrap value; B2 activates buggy-personality-v1 by append-only config revision
+
+authority:
+  tier: HIGHEST_ASSISTANT_TIER
+  security_authority: NETWORKCORE
+  self_approval: false
+  authority_self_escalation: false
+  risk_downgrade: false
+
+owner:
+  binding_authority: NETWORKCORE
+  binding_value: PROVISIONED_EXTERNALLY

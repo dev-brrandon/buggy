@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: Legit Assistant Buggy Control Center API
+  version: 1.0.0
+  description: >-
+    Read-only B8 projections over Buggy B1-B7 and Foundation-owned state. All
+    mutations remain on the existing pipeline-backed Assistant API and retain
+    normal security, approval, idempotency and audit controls.
+servers:
+  - url: /api/assistant/v1/buggy
+paths:
+  /overview:
+    get:
+      operationId: getBuggyOverview
+      responses:
+        '200': { $ref: '#/components/responses/Resource' }
+  /identity:
+    get:
+      operationId: getBuggyIdentity
+      responses:
+        '200': { $ref: '#/components/responses/Resource' }
+  /personality:
+    get:
+      operationId: getBuggyPersonality
+      responses:
+        '200': { $ref: '#/components/responses/Resource' }
+  /tasks:
+    get:
+      operationId: listBuggyTasks
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /activity:
+    get:
+      operationId: listBuggyActivity
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /approvals:
+    get:
+      operationId: listBuggyApprovals
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /incidents:
+    get:
+      operationId: listBuggyIncidents
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /knowledge:
+    get:
+      operationId: searchBuggyKnowledge
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 256 }
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /self-development:
+    get:
+      operationId: listBuggySelfDevelopment
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /automations:
+    get:
+      operationId: listBuggyAutomations
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /tools:
+    get:
+      operationId: listBuggyTools
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+  /security:
+    get:
+      operationId: getBuggySecurity
+      responses:
+        '200': { $ref: '#/components/responses/Resource' }
+  /audit:
+    get:
+      operationId: searchBuggyAudit
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 256 }
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200': { $ref: '#/components/responses/Page' }
+components:
+  parameters:
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque pagination cursor.
+      schema: { type: string }
+  responses:
+    Resource:
+      description: Authorized read-only Buggy Control Center projection.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ResourceView' }
+    Page:
+      description: Authorized bounded page of Buggy Control Center projections.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ResourcePage' }
+  schemas:
+    ResourceView:
+      type: object
+      required: [id, attributes]
+      properties:
+        id: { type: string, maxLength: 192 }
+        attributes:
+          type: object
+          additionalProperties: true
+          maxProperties: 128
+    ResourcePage:
+      type: object
+      required: [items, pageSize, hasMore]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ResourceView' }
+        pageSize: { type: integer, minimum: 1, maximum: 100 }
+        hasMore: { type: boolean }
+        nextCursor: { type: [string, 'null'] }

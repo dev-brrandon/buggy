@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Legit Assistant Buggy Control Center">
+  <title>Buggy Control Center</title>
+  <link rel="stylesheet" href="assets/control-center.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="app-shell" id="buggy-control-center">
+    <aside class="sidebar" aria-label="Buggy Control Center navigation">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true">B</div>
+        <div>
+          <div class="eyebrow">LEGIT ASSISTANT</div>
+          <div class="brand-title">Buggy Control Center</div>
+        </div>
+      </div>
+
+      <div class="connection-card" id="connection-card" role="status" aria-live="polite">
+        <span class="status-dot" id="connection-dot" aria-hidden="true"></span>
+        <div>
+          <strong id="connection-label">Connecting</strong>
+          <div class="muted" id="connection-detail">Waiting for Panel Backend bridge</div>
+        </div>
+      </div>
+
+      <nav id="plane-navigation" class="plane-navigation"></nav>
+
+      <div class="sidebar-footer">
+        <button class="ghost-button" id="refresh-button" type="button">Refresh current view</button>
+        <div class="muted compact" id="last-refresh">Not refreshed yet</div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="plane-label">COMMAND</div>
+          <h1 id="surface-title">Overview</h1>
+          <p class="surface-subtitle" id="surface-subtitle">Owner command view for Buggy.</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="context-pill" id="active-context" hidden></div>
+          <button class="ghost-button" id="open-chat-button" type="button">Open context in Chat</button>
+        </div>
+      </header>
+
+      <main id="main-content" class="main-content" tabindex="-1">
+        <section id="alert-region" class="alert-region" aria-live="polite"></section>
+        <section id="surface-toolbar" class="surface-toolbar" hidden></section>
+        <section id="surface-content" class="surface-content" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <aside class="emergency-rail" aria-label="Foundation emergency controls">
+      <div class="emergency-heading">
+        <div>
+          <div class="eyebrow danger">FOUNDATION CONTROL</div>
+          <h2>Emergency controls</h2>
+        </div>
+        <span class="shield-badge">Owner only</span>
+      </div>
+      <p class="muted">These controls are outside Buggy authority. Every command must be re-authorized by the Panel Backend and Foundation pipeline.</p>
+      <div class="security-state" id="security-state">
+        <div><span>Authority</span><strong>NetworkCore</strong></div>
+        <div><span>Mode</span><strong id="security-mode">Unknown</strong></div>
+        <div><span>Kill switches</span><strong id="security-kills">Unknown</strong></div>
+      </div>
+      <div class="emergency-grid" id="emergency-controls">
+        <button type="button" data-emergency="buggy.emergency.pause">Pause Buggy</button>
+        <button type="button" data-emergency="buggy.emergency.read-only">Read only</button>
+        <button type="button" data-emergency="buggy.emergency.disable-automations">Disable automations</button>
+        <button type="button" data-emergency="buggy.emergency.disable-self-healing">Disable self-healing</button>
+        <button type="button" data-emergency="buggy.emergency.disable-tools">Disable tools</button>
+        <button type="button" data-emergency="buggy.emergency.maintenance">Maintenance mode</button>
+      </div>
+      <div class="boundary-note">
+        <strong>Authority boundary</strong>
+        <p>NetworkCore authoritative. Buggy cannot autonomously modify or bypass these controls.</p>
+      </div>
+    </aside>
+  </div>
+
+  <dialog id="confirm-dialog" class="confirm-dialog">
+    <form method="dialog">
+      <div class="eyebrow danger">OWNER DECISION</div>
+      <h2 id="confirm-title">Confirm emergency control</h2>
+      <p id="confirm-copy">This action changes Foundation-owned runtime controls.</p>
+      <div class="dialog-actions">
+        <button class="ghost-button" value="cancel">Cancel</button>
+        <button class="danger-button" id="confirm-action" value="confirm">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="assets/control-center.js"></script>
+</body>
+</html>
